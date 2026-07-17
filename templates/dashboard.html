@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadSensei - Профессиональный мониторинг лидов</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a5ae0;
+            --secondary: #6c757d;
+            --success: #34c759;
+            --danger: #ff3b30;
+            --warning: #ffcc00;
+            --info: #5ac8fa;
+            --dark: #1e2a4a;
+            --light: #f8f9fa;
+            --gray: #e9ecef;
+            --border: #dee2e6;
+            --bg-main: #f5f7f9;
+            --bg-card: #ffffff;
+            --text-main: #212529;
+            --text-secondary: #6c757d;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-main);
+            line-height: 1.6;
+            font-size: 0.875rem;
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--dark);
+            color: white;
+            padding: 1.5rem 1rem;
+            transition: all 0.3s ease;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-left: 0.75rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: var(--radius);
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 1.5rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .notification {
+            position: relative;
+            margin-right: 1.5rem;
+            cursor: pointer;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Stats */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-title {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            margin-top: auto;
+        }
+
+        .change-up {
+            color: var(--success);
+        }
+
+        .change-down {
+            color: var(--danger);
+        }
+
+        /* Charts */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--gray);
+        }
+
+        tr:hover {
+            background: var(--gray);
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-new {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--success);
+        }
+
+        .status-in-progress {
+            background: rgba(255, 204, 0, 0.15);
+            color: var(--warning);
+        }
+
+        .status-closed {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--danger);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 0.875rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            background: var(--gray);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2daa4c;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Tag input */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: var(--gray);
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .tag-remove {
+            margin-left: 0.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Content sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* AI Recommendations */
+        .ai-recommendation {
+            background: rgba(90, 200, 250, 0.1);
+            border-left: 4px solid var(--info);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .recommendation-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--info);
+        }
+
+        /* Notification list */
+        .notification-list {
+            list-style: none;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-icon {
+            margin-right: 1rem;
+            color: var(--primary);
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-time {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        /* Settings grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .setting-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+                padding: 1rem 0.5rem;
+            }
+
+            .logo-text, .nav-text {
+                display: none;
+            }
+
+            .nav-link i {
+                margin-right: 0;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
+                          stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="logo-text">LeadSensei</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="#" class="nav-link active" data-section="dashboard">
+                        <i data-feather="pie-chart"></i>
+                        <span class="nav-text">Дашборд</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="leads">
+                        <i data-feather="users"></i>
+                        <span class="nav-text">Лиды</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="monitoring">
+                        <i data-feather="search"></i>
+                        <span class="nav-text">Мониторинг</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="ai-analysis">
+                        <i data-feather="cpu"></i>
+                        <span class="nav-text">AI Анализ</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="analytics">
+                        <i data-feather="bar-chart-2"></i>
+                        <span class="nav-text">Аналитика</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="notifications">
+                        <i data-feather="bell"></i>
+                        <span class="nav-text">Уведомления</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-section="settings">
+                        <i data-feather="settings"></i>
+                        <span class="nav-text">Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1 class="page-title">Дашборд лидов</h1>
+                <div class="user-menu">
+                    <div class="notification">
+                        <i data-feather="bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="user-profile">
+                        <div class="avatar">AK</div>
+                        <div>
+                            <div>{{ user.username }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ user.role }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div class="content-section active" id="dashboard">
+                <!-- Stats Cards -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-title">Новых лидов сегодня</div>
+                        <div class="stat-value">{{ stats.today_leads }}</div>
+                        <div class="stat-change change-up">+12% с прошлой недели</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Всего лидов за месяц</div>
+                        <div class="stat-value">342</div>
+                        <div class="stat-change change-up">+8% с прошлого месяца</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Конверсия в продажи</div>
+                        <div class="stat-value">18%</div>
+                        <div class="stat-change change-up">+3% с прошлого месяца</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Среднее время ответа</div>
+                        <div class="stat-value">12 мин</div>
+                        <div class="stat-change change-down">+2 мин с прошлой недели</div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Лиды по дням</div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="leadsChart" height="250"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Источники лидов</div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="sourcesChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leads Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Последние лиды</div>
+                        <button class="btn btn-outline">
+                            <i data-feather="download"></i>
+                            Экспорт в CSV
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Имя</th>
+                                    <th>Телеграм</th>
+                                    <th>Источник</th>
+                                    <th>Ключевое слово</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for lead in recent_leads %}
+                                <tr>
+                                    <td>{{ lead.date }}</td>
+                                    <td>{{ lead.name }}</td>
+                                    <td>{{ lead.telegram }}</td>
+                                    <td>{{ lead.source }}</td>
+                                    <td>{{ lead.keyword }}</td>
+                                    <td><span class="status status-{{ lead.status|lower|replace(' ', '-') }}">{{ lead.status }}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="message-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leads Section -->
+            <div class="content-section" id="leads">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Управление лидами</div>
+                        <div>
+                            <button class="btn btn-outline">
+                                <i data-feather="filter"></i>
+                                Фильтры
+                            </button>
+                            <button class="btn btn-primary">
+                                <i data-feather="plus"></i>
+                                Добавить лид
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="filters">
+                            <div class="filter-group">
+                                <label class="form-label">Статус</label>
+                                <select class="form-control">
+                                    <option>Все статусы</option>
+                                    <option>Новый</option>
+                                    <option>В работе</option>
+                                    <option>Закрыт</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label">Источник</label>
+                                <select class="form-control">
+                                    <option>Все источники</option>
+                                    <option>Недвижимость</option>
+                                    <option>Юристы</option>
+                                    <option>Дизайн</option>
+                                    <option>IT</option>
+                                    <option>Маркетинг</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label">Дата</label>
+                                <select class="form-control">
+                                    <option>За все время</option>
+                                    <option>Сегодня</option>
+                                    <option>Вчера</option>
+                                    <option>Последние 7 дней</option>
+                                    <option>Этот месяц</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox">
+                                    </th>
+                                    <th>Дата</th>
+                                    <th>Имя</th>
+                                    <th>Телеграм</th>
+                                    <th>Телефон</th>
+                                    <th>Источник</th>
+                                    <th>Ключевое слово</th>
+                                    <th>Статус</th>
+                                    <th>Менеджер</th>
+                                    <th>Действия</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>12.04.2023 14:23</td>
+                                    <td>Мария Иванова</td>
+                                    <td>@maria_ivanova</td>
+                                    <td>+7 (999) 123-45-67</td>
+                                    <td>Чат "Недвижимость Москвы"</td>
+                                    <td>купить квартиру</td>
+                                    <td><span class="status status-new">Новый</span></td>
+                                    <td>Не назначен</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="message-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>12.04.2023 13:47</td>
+                                    <td>Сергей Петров</td>
+                                    <td>@sergey_petrov</td>
+                                    <td>+7 (999) 234-56-78</td>
+                                    <td>Канал "Бизнес консультации"</td>
+                                    <td>юридические услуги</td>
+                                    <td><span class="status status-in-progress">В работе</span></td>
+                                    <td>Алексей К.</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="message-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>12.04.2023 12:15</td>
+                                    <td>Анна Сидорова</td>
+                                    <td>@anna_sidorova</td>
+                                    <td>+7 (999) 345-67-89</td>
+                                    <td>Чат "Дизайн интерьера"</td>
+                                    <td>дизайнер интерьера</td>
+                                    <td><span class="status status-closed">Закрыт</span></td>
+                                    <td>Ирина С.</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="message-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>12.04.2023 11:32</td>
+                                    <td>Дмитрий Кузнецов</td>
+                                    <td>@dmitry_kuznetsov</td>
+                                    <td>+7 (999) 456-78-90</td>
+                                    <td>Чат "Стартапы и IT"</td>
+                                    <td>разработка приложений</td>
+                                    <td><span class="status status-new">Новый</span></td>
+                                    <td>Не назначен</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="message-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>12.04.2023 10:54</td>
+                                    <td>Ольга Новикова</td>
+                                    <td>@olga_novikova</td>
+                                    <td>+7 (999) 567-89-01</td>
+                                    <td>Канал "Маркетинг и Реклама"</td>
+                                    <td>продвижение в соцсетях</td>
+                                    <td><span class="status status-in-progress">В работе</span></td>
+                                    <td>Алексей К.</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline">
+                                            <i data-feather="message-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+                            <div>Показано 5 из 342 лидов</div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-outline">
+                                    <i data-feather="chevron-left"></i>
+                                </button>
+                                <button class="btn btn-outline">1</button>
+                                <button class="btn btn-outline">2</button>
+                                <button class="btn btn-outline">3</button>
+                                <button class="btn btn-outline">
+                                    <i data-feather="chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitoring Section -->
+            <div class="content-section" id="monitoring">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Настройки мониторинга</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="keywords">Ключевые слова</div>
+                            <div class="tab" data-tab="chats">Чаты и каналы</div>
+                            <div class="tab" data-tab="ai">AI Рекомендации</div>
+                        </div>
+
+                        <div class="tab-content active" id="keywords-tab">
+                            <div class="form-group">
+                                <label class="form-label">Добавить ключевые слова</label>
+                                <div class="tags-container">
+                                    <div class="tag">
+                                        купить квартиру
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        ищу юриста
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        нужен дизайнер
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        разработка приложений
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        продвижение в соцсетях
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control" placeholder="Введите ключевое слово и нажмите Enter">
+                            </div>
+                            <button class="btn btn-primary">Сохранить изменения</button>
+                        </div>
+
+                        <div class="tab-content" id="chats-tab">
+                            <div class="form-group">
+                                <label class="form-label">Добавленные чаты и каналы</label>
+                                <div class="tags-container">
+                                    <div class="tag">
+                                        Недвижимость Москвы
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        Бизнес консультации
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        Дизайн интерьера
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        Стартапы и IT
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        Маркетинг и Реклама
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                </div>
+                                <form hx-post="/add_chat" hx-target="#chats-list" hx-swap="beforeend">
+                                    <input name="chat_username" type="text" class="form-control" placeholder="Введите username чата или канала" required>
+                                    <button class="btn btn-primary" type="submit">Добавить чат</button>
+                                </form>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-content" id="ai-tab">
+                            <div class="form-group">
+                                <label class="form-label">AI рекомендует добавить ключевые слова:</label>
+                                <div class="tags-container">
+                                    <div class="tag">
+                                        аренда квартиры
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        юридическая консультация
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        дизайн проект
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        мобильное приложение
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        таргетированная реклама
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">AI рекомендует отслеживать чаты:</label>
+                                <div class="tags-container">
+                                    <div class="tag">
+                                        Архитектура и дизайн
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        IT разработка
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                    <div class="tag">
+                                        Юридические услуги
+                                        <span class="tag-remove">×</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">Применить рекомендации</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Активность мониторинга</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="charts-row">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Сообщений обработано</div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="activityChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Эффективность ключевых слов</div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="keywordsChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis Section -->
+            <div class="content-section" id="ai-analysis">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">AI Анализ лидов</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="ai-recommendation">
+                            <div class="recommendation-title">Рекомендация по улучшению эффективности</div>
+                            <p>На основе анализа ваших лидов, AI рекомендует добавить ключевые слова связанные с "ремонт квартир" и "дизайн проект". Эти запросы показывают высокую
+                                конверсию в вашей нише.</p>
+                        </div>
+
+                        <div class="ai-recommendation">
+                            <div class="recommendation-title">Обнаружены сезонные тенденции</div>
+                            <p>За последние 2 недели наблюдается увеличение запросов на юридические услуги для бизнеса на 23%. Рекомендуем увеличить охват в тематических
+                                бизнес-чатах.</p>
+                        </div>
+
+                        <div class="charts-row">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Прогноз лидов на следующую неделю</div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="forecastChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Эффективность каналов</div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="channelsChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Настройки AI анализа</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="settings-grid">
+                            <div class="setting-card">
+                                <h3>Автоматические рекомендации</h3>
+                                <p>AI будет анализировать ваши лиды и предлагать улучшения</p>
+                                <div class="form-group">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Прогнозирование лидов</h3>
+                                <p>Использовать AI для прогнозирования количества лидов</p>
+                                <div class="form-group">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Автоматическая категоризация</h3>
+                                <p>Автоматически определять категории лидов</p>
+                                <div class="form-group">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Определение настроения</h3>
+                                <p>Анализировать тональность сообщений</p>
+                                <div class="form-group">
+                                    <label class="switch">
+                                        <input type="checkbox">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div class="content-section" id="analytics">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Аналитика эффективности</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="filters">
+                            <div class="filter-group">
+                                <label class="form-label">Период</label>
+                                <select class="form-control">
+                                    <option>Последние 7 дней</option>
+                                    <option>Последние 30 дней</option>
+                                    <option>Этот месяц</option>
+                                    <option>Прошлый месяц</option>
+                                    <option>Этот квартал</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label">Менеджер</label>
+                                <select class="form-control">
+                                    <option>Все менеджеры</option>
+                                    <option>Алексей К.</option>
+                                    <option>Ирина С.</option>
+                                    <option>Ольга М.</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label">Источник</label>
+                                <select class="form-control">
+                                    <option>Все источники</option>
+                                    <option>Недвижимость</option>
+                                    <option>Юристы</option>
+                                    <option>Дизайн</option>
+                                    <option>IT</option>
+                                    <option>Маркетинг</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="charts-row">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Конверсия по менеджерам</div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="conversionChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">Время ответа</div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="responseTimeChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Эффективность ключевых слов</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                        <tr>
+                                            <th>Ключевое слово</th>
+                                            <th>Найдено упоминаний</th>
+                                            <th>Конверсия в лиды</th>
+                                            <th>Конверсия в продажи</th>
+                                            <th>Эффективность</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>купить квартиру</td>
+                                            <td>142</td>
+                                            <td>24%</td>
+                                            <td>8%</td>
+                                            <td>Высокая</td>
+                                        </tr>
+                                        <tr>
+                                            <td>юридические услуги</td>
+                                            <td>87</td>
+                                            <td>18%</td>
+                                            <td>6%</td>
+                                            <td>Средняя</td>
+                                        </tr>
+                                        <tr>
+                                            <td>дизайнер интерьера</td>
+                                            <td>53</td>
+                                            <td>22%</td>
+                                            <td>7%</td>
+                                            <td>Высокая</td>
+                                        </tr>
+                                        <tr>
+                                            <td>разработка приложений</td>
+                                            <td>76</td>
+                                            <td>15%</td>
+                                            <td>5%</td>
+                                            <td>Средняя</td>
+                                        </tr>
+                                        <tr>
+                                            <td>продвижение в соцсетях</td>
+                                            <td>64</td>
+                                            <td>12%</td>
+                                            <td>4%</td>
+                                            <td>Низкая</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="content-section" id="notifications">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Уведомления</div>
+                        <button class="btn btn-outline">Пометить все как прочитанные</button>
+                    </div>
+                    <div class="card-body">
+                        <ul class="notification-list">
+                            <li class="notification-item">
+                                <div class="notification-icon">
+                                    <i data-feather="zap"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div>Новый лид из чата "Недвижимость Москвы": Мария Иванова ищет "купить квартиру"</div>
+                                    <div class="notification-time">12.04.2023 14:23</div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline">
+                                        <i data-feather="check"></i>
+                                    </button>
+                                </div>
+                            </li>
+                            <li class="notification-item">
+                                <div class="notification-icon">
+                                    <i data-feather="alert-circle"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div>Сергей Петров из "Бизнес консультации" ждет ответа более 30 минут</div>
+                                    <div class="notification-time">12.04.2023 14:05</div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline">
+                                        <i data-feather="check"></i>
+                                    </button>
+                                </div>
+                            </li>
+                            <li class="notification-item">
+                                <div class="notification-icon">
+                                    <i data-feather="bar-chart"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div>За прошлую неделю конверсия лидов увеличилась на 5%</div>
+                                    <div class="notification-time">12.04.2023 10:45</div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline">
+                                        <i data-feather="check"></i>
+                                    </button>
+                                </div>
+                            </li>
+                            <li class="notification-item">
+                                <div class="notification-icon">
+                                    <i data-feather="cpu"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div>AI обнаружил новые ключевые слова для мониторинга: "аренда квартиры", "юридическая консультация"</div>
+                                    <div class="notification-time">11.04.2023 18:30</div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline">
+                                        <i data-feather="check"></i>
+                                    </button>
+                                </div>
+                            </li>
+                            <li class="notification-item">
+                                <div class="notification-icon">
+                                    <i data-feather="user-plus"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div>Новый менеджер Ирина С. добавлена в систему</div>
+                                    <div class="notification-time">11.04.2023 09:15</div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline">
+                                        <i data-feather="check"></i>
+                                    </button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Настройки уведомлений</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="settings-grid">
+                            <div class="setting-card">
+                                <h3>Email уведомления</h3>
+                                <p>Получать уведомления на email</p>
+                                <div class="form-group">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Telegram уведомления</h3>
+                                <p>Получать уведомления в Telegram</p>
+                                <div class="form-group">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Уведомления о новых лидах</h3>
+                                <p>Получать уведомления о новых лидах</p>
+                                <div class="form-group">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Уведомления о проблемах</h3>
+                                <p>Получать уведомления о проблемах с системой</p>
+                                <div class="form-group">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="content-section" id="settings">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Настройки аккаунта</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="settings-grid">
+                            <div class="setting-card">
+                                <h3>Профиль пользователя</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Имя</label>
+                                    <input type="text" class="form-control" value="Алексей К.">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" value="alexey@company.com">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Телефон</label>
+                                    <input type="tel" class="form-control" value="+7 (999) 123-45-67">
+                                </div>
+                                <button class="btn btn-primary">Сохранить изменения</button>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Безопасность</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Текущий пароль</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Новый пароль</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Подтвердите пароль</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <button class="btn btn-primary">Сменить пароль</button>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Интеграции</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Telegram бот</label>
+                                    <div style="display: flex; align-items: center;">
+                                        <span style="margin-right: 0.5rem;">@leadssensei_bot</span>
+                                        <span class="status status-new">Подключен</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">CRM система</label>
+                                    <select class="form-control">
+                                        <option>Не подключено</option>
+                                        <option>Bitrix24</option>
+                                        <option>AmoCRM</option>
+                                        <option>RetailCRM</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary">Сохранить настройки</button>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3>Тарифный план</h3>
+                                <div class="form-group">
+                                    <div style="font-size: 1.25rem; font-weight: 600;">{{ user.tariff }}</div>
+                                    <div>4990 руб./месяц</div>
+                                </div>
+                                <div class="form-group">
+                                    <ul style="list-style: none;">
+                                        <li>✓ Мониторинг до 50 чатов</li>
+                                        <li>✓ 1000 ключевых слов</li>
+                                        <li>✓ AI анализ и рекомендации</li>
+                                        <li>✓ Полная история лидов</li>
+                                        <li>✓ Поддержка 24/7</li>
+                                    </ul>
+                                </div>
+                                <button class="btn btn-outline">Сменить тариф</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize feather icons
+            feather.replace();
+
+            // Initialize charts
+            const leadsCtx = document.getElementById('leadsChart').getContext('2d');
+            const leadsChart = new Chart(leadsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1 апр', '3 апр', '5 апр', '7 апр', '9 апр', '11 апр', '13 апр'],
+                    datasets: [{
+                        label: 'Лиды',
+                        data: [12, 19, 15, 17, 22, 23, 24],
+                        borderColor: '#4a6cf7',
+                        backgroundColor: 'rgba(74, 108, 247, 0.05)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            const sourcesCtx = document.getElementById('sourcesChart').getContext('2d');
+            const sourcesChart = new Chart(sourcesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Недвижимость', 'Юристы', 'Дизайн', 'IT', 'Маркетинг'],
+                    datasets: [{
+                        data: [35, 25, 15, 15, 10],
+                        backgroundColor: [
+                            '#4a6cf7',
+                            '#34c759',
+                            '#ffcc00',
+                            '#ff3b30',
+                            '#af52de'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Activity chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            const activityChart = new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                    datasets: [{
+                        label: 'Сообщений обработано',
+                        data: [5420, 6320, 5840, 6920, 7320, 4120, 3820],
+                        backgroundColor: '#4a6cf7'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Keywords chart
+            const keywordsCtx = document.getElementById('keywordsChart').getContext('2d');
+            const keywordsChart = new Chart(keywordsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Квартира', 'Юрист', 'Дизайн', 'Приложение', 'Продвижение'],
+                    datasets: [{
+                        label: 'Эффективность',
+                        data: [85, 70, 78, 65, 55],
+                        backgroundColor: '#34c759'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Forecast chart
+            const forecastCtx = document.getElementById('forecastChart').getContext('2d');
+            const forecastChart = new Chart(forecastCtx, {
+                type: 'line',
+                data: {
+                    labels: ['14 апр', '15 апр', '16 апр', '17 апр', '18 апр', '19 апр', '20 апр'],
+                    datasets: [
+                        {
+                            label: 'Прогноз',
+                            data: [26, 28, 30, 32, 31, 29, 33],
+                            borderColor: '#4a6cf7',
+                            backgroundColor: 'rgba(74, 108, 247, 0.05)',
+                            tension: 0.4,
+                            fill: true,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Исторические данные',
+                            data: [22, 23, 24, null, null, null, null],
+                            borderColor: '#34c759',
+                            backgroundColor: 'transparent',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Channels chart
+            const channelsCtx = document.getElementById('channelsChart').getContext('2d');
+            const channelsChart = new Chart(channelsCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Конверсия', 'Скорость', 'Качество', 'Количество', 'Ценность'],
+                    datasets: [
+                        {
+                            label: 'Недвижимость',
+                            data: [85, 78, 90, 75, 80],
+                            backgroundColor: 'rgba(74, 108, 247, 0.2)',
+                            borderColor: '#4a6cf7',
+                            pointBackgroundColor: '#4a6cf7'
+                        },
+                        {
+                            label: 'Юристы',
+                            data: [70, 65, 80, 60, 75],
+                            backgroundColor: 'rgba(52, 199, 89, 0.2)',
+                            borderColor: '#34c759',
+                            pointBackgroundColor: '#34c759'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+
+            // Conversion chart
+            const conversionCtx = document.getElementById('conversionChart').getContext('2d');
+            const conversionChart = new Chart(conversionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Алексей К.', 'Ирина С.', 'Ольга М.'],
+                    datasets: [
+                        {
+                            label: 'Конверсия в лиды',
+                            data: [25, 22, 18],
+                            backgroundColor: '#4a6cf7'
+                        },
+                        {
+                            label: 'Конверсия в продажи',
+                            data: [8, 7, 6],
+                            backgroundColor: '#34c759'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 30,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Response time chart
+            const responseTimeCtx = document.getElementById('responseTimeChart').getContext('2d');
+            const responseTimeChart = new Chart(responseTimeCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                    datasets: [
+                        {
+                            label: 'Среднее время ответа (мин)',
+                            data: [15, 12, 14, 10, 8, 18, 22],
+                            borderColor: '#4a6cf7',
+                            backgroundColor: 'rgba(74, 108, 247, 0.05)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Tab switching
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                    tab.classList.add('active');
+
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+
+            // Section switching
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Remove active class from all links and sections
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+
+                    // Add active class to clicked link
+                    this.classList.add('active');
+
+                    // Show corresponding section
+                    const sectionId = this.getAttribute('data-section');
+                    document.getElementById(sectionId).classList.add('active');
+
+                    // Update page title
+                    const pageTitle = document.querySelector('.page-title');
+                    pageTitle.textContent = this.querySelector('.nav-text').textContent;
+                });
+            });
+
+            // Notification badge click
+            const notification = document.querySelector('.notification');
+            notification.addEventListener('click', () => {
+                // Switch to notifications section
+                navLinks.forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+
+                document.querySelector('[data-section="notifications"]').classList.add('active');
+                document.getElementById('notifications').classList.add('active');
+
+                // Update page title
+                document.querySelector('.page-title').textContent = 'Уведомления';
+
+                // Reset badge
+                const badge = document.querySelector('.badge');
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

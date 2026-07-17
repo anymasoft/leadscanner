@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация — LeadSensei</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a5ae0;
+            --secondary: #6c757d;
+            --success: #34c759;
+            --danger: #ff3b30;
+            --warning: #ffcc00;
+            --info: #5ac8fa;
+            --dark: #1e2a4a;
+            --light: #f8f9fa;
+            --gray: #e9ecef;
+            --border: #dee2e6;
+            --bg-main: #f5f7f9;
+            --bg-card: #ffffff;
+            --text-main: #212529;
+            --text-secondary: #6c757d;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+            --radius: 8px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-main);
+            line-height: 1.6;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .auth-container {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .auth-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .auth-header p {
+            color: var(--text-secondary);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .logo svg {
+            width: 32px;
+            height: 32px;
+            margin-right: 0.75rem;
+        }
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--primary);
+            color: white;
+        }
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .alert-danger {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+        .alert-success {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#4a6cf7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="logo-text">LeadSensei</span>
+        </div>
+
+        <div class="auth-header">
+            <h1>Создайте аккаунт</h1>
+            <p>Начните находить горячие лиды уже сегодня</p>
+        </div>
+
+        {% if request.query_params.error %}
+        <div class="alert alert-danger">
+            {{ request.query_params.error }}
+        </div>
+        {% endif %}
+
+        {% if request.query_params.success %}
+        <div class="alert alert-success">
+            {{ request.query_params.success }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="form-group">
+                <label for="username" class="form-label">Имя пользователя</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Введите имя пользователя" required>
+            </div>
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Введите ваш email" required>
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Пароль</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Введите пароль" required minlength="6">
+            </div>
+            <button type="submit" class="btn">Зарегистрироваться</button>
+        </form>
+
+        <div class="auth-footer">
+            Уже есть аккаунт? <a href="/login">Войдите здесь</a>
+        </div>
+    </div>
+</body>
+</html>
